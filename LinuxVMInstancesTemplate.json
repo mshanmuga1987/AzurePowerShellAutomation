@@ -1,0 +1,235 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUser": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "adminPublicKey": {
+            "type": "string"
+        },
+        "vmnameprefix": {
+            "type": "string",
+            "defaultValue": "centos73vm",
+            "metadata": {
+                "description": "specifies virtual machine prefix name"
+            }
+        },
+        "numberOfInstances": {
+            "type": "int",
+            "defaultValue": 2,
+            "metadata": {
+                "description": "Number of VM instances to be created."
+            }
+        },
+        "nicnameprefix": {
+            "type": "string",
+            "defaultValue": "nic",
+            "metadata": {
+                "description": "specifies nic prefix name"
+            }
+        },
+        "vnetname": {
+            "type": "string",
+            "defaultValue": "centosvnet"
+        },
+        "subnetname": {
+            "type": "string",
+            "defaultValue": "centossubnet1"
+        },
+        "imagePublisher": {
+            "type": "string",
+            "defaultValue": "OpenLogic"
+        },
+        "imageOffer": {
+            "type": "string",
+            "defaultValue": "centos"
+        },
+        "imageSKU": {
+            "type": "string",
+            "defaultValue": "7.3"
+        },
+        "vmsize": {
+            "type": "string",
+            "defaultValue": "Standard_A3"
+        },
+        "publicipnameprefix": {
+            "type": "string",
+            "defaultValue": "pip",
+            "metadata": {
+                "description": "specifies public ip name prefix"
+            }
+        },
+        "disksize": {
+            "type": "int",
+            "defaultValue": 40
+        },
+        "storageaccountname": {
+            "type": "string",
+            "defaultValue": "store0518"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2017-03-01",
+            "location": "[resourceGroup().location]",
+            "name": "[concat(parameters('publicipnameprefix'),copyindex())]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(parameters('vmNamePrefix'), copyindex())]"
+                }
+            },
+            "copy": {
+                "name": "publiciploop",
+                "count": "[parameters('numberOfInstances')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2017-03-01",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('vnetname')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "192.168.3.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetname')]",
+                        "properties": {
+                            "addressPrefix": "192.168.3.0/27"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2017-03-01",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicloop",
+                "count": "[parameters('numberOfInstances')]"
+            },
+            "name": "[concat(parameters('nicnameprefix'),copyindex())]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(resourceid('Microsoft.Network/virtualNetworks/', parameters('vnetname')), '/subnets/', parameters('subnetname'))]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('publicipnameprefix'),copyindex()))]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceid('Microsoft.Network/virtualNetworks', parameters('vnetname'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('publicipnameprefix'),copyindex()))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[resourceGroup().location]",
+            "name": "[concat(parameters('vmNamePrefix'), copyindex())]",
+            "copy": {
+                "name": "vmLoop",
+                "count": "[parameters('numberOfInstances')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), copyindex())]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmsize')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('nicNamePrefix'),copyindex()))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "adminUsername": "[parameters('adminUser')]",
+                    "computerName": "[concat(parameters('vmNamePrefix'), copyIndex())]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": "false",
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[concat('/home/', parameters('adminUser'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('adminPublicKey')]"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "diskSizeGB": "[parameters('disksize')]",
+                        "osType": "Linux",
+                        "caching": "ReadWrite",
+                        "name": "[concat (copyindex(), 'oscentos73')]",
+                        "vhd": {
+                            "uri": "[concat('https://', parameters('storageAccountName'), '.blob.core.windows.net', '/vhds/', copyindex(), 'oscentos73', '.vhd')]"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "[parameters('imagepublisher')]",
+                        "offer": "[parameters('imageoffer')]",
+                        "sku": "[parameters('imagesku')]",
+                        "version": "latest"
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net')]"
+                    }
+                }
+            },
+            "resources": [
+                {
+                    "type": "extensions",
+                    "name": "LAMPCustomScriptExtension",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2015-06-15",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'), copyindex())]"
+                    ],
+                    "tags": {
+                        "displayName": "CentOSLAMPScript"
+                    },
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Extensions",
+                        "type": "CustomScript",
+                        "typeHandlerVersion": "2.0",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": [
+                                "https://store0518.blob.core.windows.net/templates/lamp73-setup.sh?sv=2016-05-31&ss=b&srt=sco&sp=rwdlac&se=2017-12-21T00:51:20Z&st=2017-06-20T16:51:20Z&spr=https&sig=f%2FLnz4u40U0tGdmxBDfO6VgWdhHzj%2BRJMVK8UjMKTUI%3D"
+                            ],
+                            "commandToExecute": "sudo sh lamp73-setup.sh"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
