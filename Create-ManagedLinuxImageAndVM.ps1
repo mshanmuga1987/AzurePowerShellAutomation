@@ -8,11 +8,10 @@ $TargetResourceGroupName = "RGManagedDisks",
 $VMSize = "Standard_A5",
 $VMName = "centos73vm",
 $SourceVMName = "centos73vm",
+$VaultName = "vaultspr",
 $SubscriptionName = "Free Trial",
 $ImageName = "centos73Image",
-$Fqdn = "centos73vm.southcentralus.cloudapp.azure.com",
-$sshusername = "root",
-$sshpassword = "7227-voya"
+$Fqdn = "centos73vm.southcentralus.cloudapp.azure.com"
 )
 
 #region Azure Logon
@@ -41,6 +40,12 @@ catch {
     }
 Select-AzureRmSubscription -SubscriptionName $SubscriptionName
 
+#endregion
+
+#region
+#Get sshpassword from Key Vault
+$sshusername = "root"
+$sshpassword = (Get-AzureKeyVaultSecret -VaultName $VaultName -Name vmadminpassword).SecretValueText
 #endregion
 
 #region
