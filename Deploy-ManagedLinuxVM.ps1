@@ -1,6 +1,6 @@
 ﻿#This function deploys a Managed Disk Azure VM running CentOS 7.3 Linux with the LAMP Stack using an ARM Template.
 #The Azure CentOS VM will be generalized and used to create a Managed Image in a seperate Resource Group
-#for provisioning multiple VMs.
+#serving as a Managed Image repository for provisioning multiple VMs.
 Param(
 $Location = "southcentralus",
 $SubscriptionName = "Free Trial",
