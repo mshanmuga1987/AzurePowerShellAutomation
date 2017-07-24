@@ -1,4 +1,5 @@
-﻿Param(
+﻿#This function creates a new Managed Disk Azure VM.
+Param(
 $Location = "southcentralus",
 $SubscriptionName = "Free Trial",
 $SourceResourceGroupName = "RGXavier",
@@ -36,7 +37,7 @@ Select-AzureRmSubscription -SubscriptionName $SubscriptionName
 #Remove the defined Resources if the Resource Group currently exists
 
 try{
-        "Removing existing Resource Group"
+        "Removing existing Resources"
         Find-AzureRmResource -ResourceGroupNameContains $ResourceGroupName | Remove-AzureRmResource -Force
 }catch {
         $ErrorMessage = "Resource Group $ResourceGroupName not found."
@@ -78,7 +79,7 @@ $vm = New-AzureRmVMConfig -VMName managedDiskVm -VMSize "standard_A5" | `
     -Skus "6.8" -Version latest | Add-AzureRmVMNetworkInterface -Id $nic.Id
 $vm = New-AzureRmVM -ResourceGroupName $ResourceGroupName -Location $Location -VM $vm
 
-#Clean up 
+#Clean up scripts 
 #$resources = Find-AzureRmResource -ResourceGroupNameContains $ResourceGroupName
 #$resources | Remove-AzureRmResource -Force
 
