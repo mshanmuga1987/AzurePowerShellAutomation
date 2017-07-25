@@ -1,9 +1,9 @@
 ﻿<#
 .SYNOPSIS
-This PowerShell Function creates an Azure Managed Image from a Linux CentOS 7.3 Managed Disk VM in different Resource Group.
+This PowerShell Function creates an Azure Managed Image from a captured/generalized Linux CentOS 7.3 Managed Disk VM in different Resource Group.
 
 .DESCRIPTION
-This PowerShell Function creates an Azure Managed Image from a Linux CentOS 7.3 Managed Disk VM in different Resource Group.
+This PowerShell Function creates an Azure Managed Image from a captured/generalized Linux CentOS 7.3 Managed Disk VM in different Resource Group.
 Then creates Managed CentOS 7.3 Linux VM with the LAMP Stack installed from the Azure Image.Multiple copies of the VM can be provisioned from same Image.
 Can be deployed as a Runbook.
 
