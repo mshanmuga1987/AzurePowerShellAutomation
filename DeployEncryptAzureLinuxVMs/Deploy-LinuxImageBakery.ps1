@@ -1,10 +1,31 @@
-﻿Param(
+﻿<# 
+
+.SYNOPSIS
+   Function to automate deployment of LAMP components while provisioning a CentOS Azure Linux VM.
+.DESCRIPTION
+   Function to automate deployment of LAMP components while provisioning a CentOS Azure Linux VM using ARM templates and a bash script.
+   It also automates the encryption of the VM OS Disk using the Azure Disk Encrytion feature and restarts the Linux VM when ready to complete the encryption process.
+.PARAMETER SubscriptionName
+        Subscription to be processed.
+.PARAMETER ResourceGroupName
+        ResourceGroup for the VM to be deployed.
+.PARAMETER AadClientID
+        Application ID of the Service Principal(assigned Contributor role) with access to the Key Vault for encryption.
+        Can be retrieved by using the Get-AzureADApplication, Get-AzureRmADApplication or Get-AzureRmADServicePrincipal.
+.PARAMETER AadClientSecret
+        The password/client key of the Service Principal generated from the AzureAD portal App Registrations/Key blade.
+       
+.FUNCTIONALITY
+        PowerShell Language
+/#>
+
+Param(
 $Location = "southcentralus",
 $SubscriptionName = "Free Trial",
 $ResourceGroupName = "RGXavier",
 $StorageAccountName = "store0518",
-$VaultName = "MyTemplateKeyVault",
-$KeyName = "testkey",
+$VaultName = "vaultspr",
+$KeyName = "EncryptKey",
 $AadClientID = "74b9c8a5-00ba-49c1-adb8-1db4757ea4df",
 $AadDisplayName = "keyspn",
 $AadClientSecret = "7227-voya",
@@ -44,8 +65,7 @@ Select-AzureRmSubscription -SubscriptionName $SubscriptionName
 
 #Remove existing resources and vhds if any
 try{
-$resources = Get-AzureRmResource -ErrorAction SilentlyContinue |?{$_.ResourceGroupName -eq $ResourceGroupName -and $_.ResourceName -ne $StorageAccountName -and $_.ResourceName -ne $VaultName -and $_.ResourceName -like "*centos*"}
-$resources |Remove-AzureRmResource -Force
+Find-AzureRmResource -ResourceGroupNameContains $ResourceGroupName | ?{$_.ResourceName -ne $VaultName -and $_.ResourceName -ne $StorageAccountName} | Remove-AzureRmResource -Force
 }catch{ $ErrorMessage = $_ 
     throw $ErrorMessage }
 $storageAccount = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
