@@ -1,5 +1,28 @@
-﻿<#Create Managed Images from Managed Disk VMs in different Resource Group.Then Create Managed VMs from the Images (Centos 7.3 Linux)
+﻿<#
+.SYNOPSIS
+This PowerShell Function creates an Azure Managed Image from a Linux CentOS 7.3 Managed Disk VM in different Resource Group.
+
+.DESCRIPTION
+This PowerShell Function creates an Azure Managed Image from a Linux CentOS 7.3 Managed Disk VM in different Resource Group.
+Then creates Managed CentOS 7.3 Linux VM with the LAMP Stack installed from the Azure Image.Multiple copies of the VM can be provisioned from same Image.
+Can be deployed as a Runbook.
+
+.PARAMETER SourceSubscriptionName
+Source Subscription of the VM to be deployed.
+
+.PARAMETER VaultName
+The Azure Key Vault name used to retrieve secrets for the VM and ssh credentials.
+
+.PARAMETER Fqdn
+Fully qualified domain name of the source VM used to ssh into the source VM to be generalized.
+
+.EXAMPLE
+Create-ManagedLinuxImageAndVM
+
+.FUNCTIONALITY
+        PowerShell Language
 /#>
+
 Param(
 $Location = "southcentralus",
 $SourceSubscriptionName = "Free Trial",
@@ -13,6 +36,8 @@ $SubscriptionName = "Free Trial",
 $ImageName = "centos73Image",
 $Fqdn = "centos73vm.southcentralus.cloudapp.azure.com"
 )
+
+Import-Module -Name SSHSessions
 
 #region Azure Logon
 $connectionName = "AzureRunAsConnection"

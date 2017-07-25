@@ -1,6 +1,27 @@
-﻿#This function deploys a Managed Disk Azure VM running CentOS 7.3 Linux with the LAMP Stack using an ARM Template.
-#The Azure CentOS VM will be generalized and used to create a Managed Image in a seperate Resource Group
-#serving as a Managed Image repository for provisioning multiple VMs.
+﻿<#
+.SYNOPSIS
+This function deploys a Managed Disk Azure VM running CentOS 7.3 Linux with the LAMP Stack using an ARM Template.
+
+.DESCRIPTION
+This function deploys a Managed Disk Azure VM running CentOS 7.3 Linux with the LAMP Stack using an ARM Template.
+The Azure CentOS VM will be generalized and used to create a Managed Image in a seperate Resource Group
+Serving as a Managed Image repository for provisioning multiple copies of the VM.Can be deployed as a Runbook.
+
+.PARAMETER SubscriptionName
+Source Subscription of the VM to be deployed.
+
+.PARAMETER TemplateUriLinux
+Uri of the Template file used to deploy the VM and LAMP Stack components.
+
+.PARAMETER TemplateParameterUriLinux
+Uri of the Template parameter file used to deploy the VM and LAMP Stack components.
+
+.EXAMPLE
+Deploy-ManagedLinuxVM
+
+.FUNCTIONALITY
+        PowerShell Language
+/#>
 Param(
 $Location = "southcentralus",
 $SubscriptionName = "Free Trial",
