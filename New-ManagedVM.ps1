@@ -15,7 +15,7 @@
         PowerShell Language
 /#>
 Param(
-$SubscriptionName = "Free Trial",
+$SubscriptionName = "Trial Subscription",
 $Location = "southcentralus",
 $ResourceGroupName = "RGManagedDisks"
 )
