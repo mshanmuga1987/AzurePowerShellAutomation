@@ -95,7 +95,7 @@ $vm = New-AzureRmVMConfig -VMName $VMName -VMSize "standard_A5" | `
     -Skus "6.8" -Version latest | Add-AzureRmVMNetworkInterface -Id $nic.Id
 $vm = New-AzureRmVM -ResourceGroupName $ResourceGroupName -Location $Location -VM $vm
 
-#Deploy LAP Stack via VMExtension
+#Deploy LAMP Stack via VMExtension
 $LampUri = "https://store0518.blob.core.windows.net/templates/lamp68-setup.sh?sv=2016-05-31&ss=b&srt=sco&sp=rwdlac&se=2017-12-21T00:51:20Z&st=2017-06-20T16:51:20Z&spr=https&sig=f%2FLnz4u40U0tGdmxBDfO6VgWdhHzj%2BRJMVK8UjMKTUI%3D"
 $Settings = @{"fileUris"= @($LampUri);"commandToExecute"="sh lamp68-setup.sh"}
 Set-AzureRmVMExtension -Publisher Microsoft.Azure.Extensions -ResourceGroupName $ResourceGroupName -VMName $VMName `
