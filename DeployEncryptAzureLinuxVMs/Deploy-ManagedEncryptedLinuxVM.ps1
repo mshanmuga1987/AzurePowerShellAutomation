@@ -26,7 +26,7 @@ Deploy-ManagedEncryptedLinuxVM
 /#>
 Param(
     $Location = "southcentralus",
-    $SubscriptionName = "Trial Subscription",
+    $SubscriptionName = "Trial",
     $ResourceGroupName = "RGXavier"
 )
 
@@ -64,11 +64,11 @@ Select-AzureRmSubscription -SubscriptionName $SubscriptionName
 $StorageAccountName = "store0518"
 $VaultName = "vaultspr"
 $KeyName = "EncryptKey"
+$SecretName = "AadClientSecret"
 $AadClientID = "74b9c8a5-00ba-49c1-adb8-1db4757ea4df"
-$AadClientSecret = "7227-voya"
+$AadClientSecret = (Get-AzureKeyVaultSecret -VaultName $VaultName -Name $SecretName).SecretValueText
 $TemplateUriLinux = "https://store0518.blob.core.windows.net/templates/ManagedDiskLinuxVM.json?sv=2016-05-31&ss=b&srt=sco&sp=rwdlac&se=2017-12-21T00:51:20Z&st=2017-06-20T16:51:20Z&spr=https&sig=f%2FLnz4u40U0tGdmxBDfO6VgWdhHzj%2BRJMVK8UjMKTUI%3D"
 $TemplateParameterUriLinux = "https://store0518.blob.core.windows.net/templates/VMSecretParameters.json?sv=2016-05-31&ss=b&srt=sco&sp=rwdlac&se=2017-12-21T00:51:20Z&st=2017-06-20T16:51:20Z&spr=https&sig=f%2FLnz4u40U0tGdmxBDfO6VgWdhHzj%2BRJMVK8UjMKTUI%3D"
-
 #endregion
 
 #region Remove existing resources and vhds if any
@@ -110,8 +110,8 @@ $KeyEncryptionKeyUrl = $kek.Key.Kid
 #region
 #Deploy VM ARM Template
 Write-Host -Object ("Started $(Get-Date)")
-New-AzureRmResourceGroupDeployment -Name ManagedDiskLinuxVM -ResourceGroupName $ResourceGroupName `
-    -DeploymentDebugLogLevel All -TemplateUri $TemplateUriLinux -TemplateParameterUri $TemplateParameterUriLinux -Verbose
+New-AzureRmResourceGroupDeployment -Name ManagedEncryptedVM -ResourceGroupName $ResourceGroupName `
+    -TemplateUri $TemplateUriLinux -TemplateParameterUri $TemplateParameterUriLinux -Verbose
 #endregion
 
 #Get Completed VMs
