@@ -1,9 +1,9 @@
 ﻿<# 
 
 .SYNOPSIS
-   Function to automate deployment of LAMP components while provisioning a CentOS Azure Linux VM.
+   Function to automate deployment of LAMP components while provisioning CentOS Azure Linux VMs.
 .DESCRIPTION
-   Function to automate deployment of LAMP components while provisioning a CentOS Azure Linux VM using ARM templates and a bash script.
+   Function to automate deployment of LAMP components while provisioning CentOS Azure Linux VMs using ARM templates and a bash script.
    It also automates the encryption of the VM OS Disk using the Azure Disk Encrytion feature and restarts the Linux VM when ready to complete the encryption process.
    This function can be deployed as an Automation runbook.
 .PARAMETER SubscriptionName
