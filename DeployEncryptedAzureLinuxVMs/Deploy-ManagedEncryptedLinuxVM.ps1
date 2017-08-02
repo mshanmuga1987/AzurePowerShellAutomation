@@ -3,8 +3,8 @@
 This function provisions, installs the LAMP Stack software components and encrypts a Managed Disk Azure VM running CentOS 7.3.
 
 .DESCRIPTION
-This function provisions, installs the LAMP Stack software components and encrypts a Managed Disk Azure VM running CentOS 7.3.
-The VM with the LAMP Stack installation is provisioned with an ARM template. PowerShell is used to initiate and restart the VM to
+This function provisions, installs the LAMP Stack software components and encrypts one or more Managed Disk Azure VM(s) running CentOS 7.3.
+The VM(s) with the LAMP Stack installation is provisioned with an ARM template. PowerShell is used to initiate and restart the VM to
 complete the encryption process.The function could be deployed as a Runbook and triggered with a set schedule or a webhook.
 
 .PARAMETER SubscriptionName
