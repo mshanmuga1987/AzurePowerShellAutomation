@@ -3,8 +3,8 @@
 This function provisions, installs the LAMP Stack software components and encrypts a Managed Disk Azure VM running CentOS 7.3.
 
 .DESCRIPTION
-This function provisions, installs the LAMP Stack software components and encrypts one or more Managed Disk Azure VM(s) running CentOS 7.3.
-The VM(s) with the LAMP Stack installation is provisioned with an ARM template. PowerShell is used to initiate and restart the VM to
+This function provisions, installs the LAMP Stack software components and encrypts one or multiple Managed Disk Azure VM(s) running CentOS 7.3.
+The VM(s) with the LAMP Stack installation is provisioned with an ARM template. PowerShell is used to initiate Azure encryption and restart the VM to
 complete the encryption process.The function could be deployed as a Runbook and triggered with a set schedule or a webhook.
 
 .PARAMETER SubscriptionName
@@ -65,8 +65,8 @@ $KeyName = "EncryptKey"
 $SecretName = "AadClientSecret"
 $AadClientID = "74b9c8a5-00ba-49c1-adb8-1db4757ea4df"
 $AadClientSecret = (Get-AzureKeyVaultSecret -VaultName $VaultName -Name $SecretName).SecretValueText
-$TemplateUriLinux = "https://store0518.blob.core.windows.net/templates/ManagedDiskLinuxVM.json?sv=2016-05-31&ss=b&srt=sco&sp=rwdlac&se=2017-12-21T00:51:20Z&st=2017-06-20T16:51:20Z&spr=https&sig=f%2FLnz4u40U0tGdmxBDfO6VgWdhHzj%2BRJMVK8UjMKTUI%3D"
-$TemplateParameterUriLinux = "https://store0518.blob.core.windows.net/templates/VMSecretParameters.json?sv=2016-05-31&ss=b&srt=sco&sp=rwdlac&se=2017-12-21T00:51:20Z&st=2017-06-20T16:51:20Z&spr=https&sig=f%2FLnz4u40U0tGdmxBDfO6VgWdhHzj%2BRJMVK8UjMKTUI%3D"
+$TemplateUriLinux = "https://raw.githubusercontent.com/jbernec/AzurePowerShellAutomation/master/AzureLinuxVMManagedImageCentOS73/ManagedDiskLinuxVM.json"
+$TemplateParameterUriLinux = "https://store0518.blob.core.windows.net/scripts/VMSecretParameters.json?sv=2016-05-31&ss=bfqt&srt=sco&sp=rwdlacup&se=2018-08-02T23:47:00Z&st=2017-08-02T15:47:00Z&spr=https&sig=OoDzCOi6FoLVt4ZkTJu%2BEsadOM2KhNDfWSppsvE864w%3D"
 #endregion
 
 #region Remove existing resources and vhds if any
