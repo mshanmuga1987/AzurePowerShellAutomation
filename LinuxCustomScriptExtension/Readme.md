@@ -1,2 +1,1 @@
-The New-ManagedVM function uses the Linux Microsoft.Azure.Extensions publisher to run a bash script that installs the LAMP Stack software 
-components on a Managed Disk Azure VM.
+The New-AzureManagedVM function provisions a CentOS6.8 Azure Vm. It also uses the Linux Microsoft.Azure.Extensions publisher to run a bash script that installs the LAMP Stack software components on the Managed Disk Azure VM at run time.
