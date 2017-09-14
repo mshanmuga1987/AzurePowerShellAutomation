@@ -20,7 +20,7 @@
 
 param(
     [parameter(Mandatory = $false)]
-    [string]$SubscriptionName = "Free Trial",
+    [string]$SubscriptionName = "Trial",
     [parameter(Mandatory = $false)]
     [string]$ResourceGroupName = "RGVPN"
        
@@ -39,8 +39,8 @@ Select-AzureRmSubscription -SubscriptionName $SubscriptionName
 
 #region create email creds
 $Smtpserver = "smtp.sendgrid.net"
-$From = "charles.chukwudozie@spr.com"
-$To = "charles.chukwudozie@spr.com"
+$From = "jack.bauer@democonsults.com"
+$To = "jack.bauer@democonsults.com"
 $Port = "587"
 $sendgridusername = "azure_a8a3e2815501214fbc3adf4ad15cc425@azure.com"
 $sendgridPassword = $env:SendGridPasswordCredential
