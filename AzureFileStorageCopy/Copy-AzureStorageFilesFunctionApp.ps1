@@ -107,7 +107,7 @@ $body = ""
 $body += "<BR>"
 $body += "These" + " " + ($Items.count) + " " + "file storage items were processed for copy. Thank you."
 $body += "<BR>"
-$body += $Items | Select-Object -Property Status, CompletionTime, @{"Label" = "Item"; e = {$_.Source.AbsolutePath}} | ConvertTo-Html -Head $a
+$body += $Items | Select-Object -Property Status, @{"Label" = "Completion Time"; e = {$_.CompletionTime.LocalDateTime}}, @{"Label" = "Item"; e = {$_.Source.AbsolutePath}} | ConvertTo-Html -Head $a
 $body = $body |Out-String
 $subject = "These items were processed for copy."
 if ($Items -ne $null) {
