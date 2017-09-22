@@ -25,7 +25,7 @@ Deploy-ManagedEncryptedLinuxVM
 /#>
 Param(
     $Location = "southcentralus",
-    $SubscriptionName = "Free Trial",
+    $SubscriptionName = "Trial",
     $ResourceGroupName = "RGXavier"
 )
 
@@ -61,7 +61,7 @@ Select-AzureRmSubscription -SubscriptionName $SubscriptionName
 
 #region keyvault and encryption variables
 $StorageAccountName = "store0518"
-$VaultName = "vaultspr"
+$VaultName = "labvault"
 $KeyName = "EncryptKey"
 $SecretName = "AadClientSecret"
 $AadClientID = "74b9c8a5-00ba-49c1-adb8-1db4757ea4df"
