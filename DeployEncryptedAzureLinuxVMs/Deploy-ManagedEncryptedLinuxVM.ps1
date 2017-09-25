@@ -1,12 +1,11 @@
 ﻿<#
 .SYNOPSIS
-This function automates the provisioning, installation of LAMP Stack software components and encryption of one or more Managed Disk Azure VM(s) running CentOS 7.3.
+The Deploy-ManagedEncryptedLinuxVM function automates the provisioning, installation of LAMP Stack software components and encryption of one or more Managed Disk Azure VM(s) running CentOS 7.3.
 
 .DESCRIPTION
-This function automates the provisioning, installation of LAMP Stack software components and encryption of one or more Managed Disk Azure VM(s) running CentOS 7.3.
+The Deploy-ManagedEncryptedLinuxVM function automates the provisioning, installation of LAMP Stack software components and encryption of one or more Managed Disk Azure VM(s) running CentOS 7.3.
 The function assumes that the Azure Key Vault infrastructure is already in place. An ARM template is used to provison the VM(s) and install the LAMP Stack.
-PowerShell is used to initiate Azure encryption and restart the VM to
-complete the encryption process.The function could be deployed as a Runbook and triggered with a set schedule or a webhook.
+PowerShell is used to initiate Azure encryption and restart the VM to complete the encryption process.The function could be deployed as a Runbook and triggered with a set schedule or a webhook.
 
 .PARAMETER SubscriptionName
 Source Subscription of the VM to be deployed.
@@ -28,8 +27,6 @@ Param(
     $SubscriptionName = "Trial",
     $ResourceGroupName = "RGXavier"
 )
-
-#Login-AzureRmAccount
 
 $connectionName = "AzureRunAsConnection"
 
@@ -64,7 +61,7 @@ $StorageAccountName = "store0518"
 $VaultName = "labvault"
 $KeyName = "EncryptKey"
 $SecretName = "AadClientSecret"
-$AadClientID = "74b9c8a5-00ba-49c1-adb8-1db4757ea4df"
+$AadClientID = "74b9c8a5-00ba-49c1-adb8-1db4757eaedf"
 $AadClientSecret = (Get-AzureKeyVaultSecret -VaultName $VaultName -Name $SecretName).SecretValueText
 $TemplateUriLinux = "https://store0518.blob.core.windows.net/scripts/ManagedDiskLinuxVM.json?sv=2016-05-31&ss=bfqt&srt=sco&sp=rwdlacup&se=2018-08-02T23:47:00Z&st=2017-08-02T15:47:00Z&spr=https&sig=OoDzCOi6FoLVt4ZkTJu%2BEsadOM2KhNDfWSppsvE864w%3D"
 $TemplateParameterUriLinux = "https://store0518.blob.core.windows.net/scripts/VMSecretParameters.json?sv=2016-05-31&ss=bfqt&srt=sco&sp=rwdlacup&se=2018-08-02T23:47:00Z&st=2017-08-02T15:47:00Z&spr=https&sig=OoDzCOi6FoLVt4ZkTJu%2BEsadOM2KhNDfWSppsvE864w%3D"
@@ -140,7 +137,54 @@ foreach ($vm in $vms) {
         Restart-AzureRmVM -ResourceGroupName $ResourceGroupName -Name $vm.name
         $encryptedVMs += $vm
     }
+    $retries = 1
+    $encryptstatus = "VMRestartPending"
+    while ($encryptstatus -eq "VMRestartPending" -or $encryptstatus -eq "EncryptionInProgress" -and $retries -gt 0) {
+        $diskstatus = Get-AzureRmVMDiskEncryptionStatus -ResourceGroupName $ResourceGroupName  -VMName $vm.name
+        $encryptstatus = $diskstatus.OsVolumeEncrypted
+        $retries++
+    }
 }
 
-#Get-Variable | Remove-Variable -ErrorAction SilentlyContinue
-#cls
+#region create email creds
+$Smtpserver = "smtp.sendgrid.net"
+$From = "jack.bauer@democonsults.com"
+$To = "tony.stark@democonsults.com"
+$Port = "587"
+$VaultName = "vaultspr"
+$SecretName = "SendgridPassword"
+$sendgridusername = "azure_a8a3e2815501214fbc3adf4ad15cc425@azure.com"
+$sendgridPassword = (Get-AzureKeyVaultSecret -VaultName $VaultName -Name $SecretName).SecretValueText
+$emailpassword = ConvertTo-SecureString -String $sendgridPassword -AsPlainText -Force
+$emailcred = New-Object System.Management.Automation.PSCredential($sendgridusername, $emailpassword)
+#endregion
+#region process email
+
+$a = "<style>"
+$a = $a + "BODY{background-color:white;}"
+$a = $a + "TABLE{border-width: 1px;border-style: solid;border-color: black;border-collapse: collapse;}"
+$a = $a + "TH{border-width: 1px;padding: 10px;border-style: solid;border-color: black;}"
+$a = $a + "TD{border-width: 1px;padding: 10px;border-style: solid;border-color: black;}"
+$a = $a + "</style>"
+$body = ""
+$body += "<BR>"
+$body += "Please review the encryption status of the following" + " " + ($encryptedVMs.count) + " " + "VMs. Thank you."
+$body += "<BR>"
+$body += "<BR>"
+$body +=  $encryptedVMs | Select-Object -Property  Name, @{"Label" = "OSDisk Encryption Status"; e = {((Get-AzureRmVMDiskEncryptionStatus -ResourceGroupName $_.ResourceGroupName -VMName $_.Name).OsVolumeEncrypted)}}, `
+@{"Label" = "Data Disk Encryption Status"; e = {((Get-AzureRmVMDiskEncryptionStatus -ResourceGroupName $_.ResourceGroupName -VMName $_.Name).DataVolumesEncrypted)}}, `
+@{"Label" = "Encryption Status"; e = {((Get-AzureRmVMDiskEncryptionStatus -ResourceGroupName $_.ResourceGroupName -VMName $_.Name).ProgressMessage)}}| ConvertTo-Html -Head $a
+$body = $body |Out-String
+$subject = "Provisioned VMs Encryption Status."
+if ($encryptedVMs -ne $null) {
+    Send-MailMessage -Body $body `
+        -BodyAsHtml `
+        -SmtpServer $smtpserver `
+        -From $from `
+        -Subject $subject `
+        -To $to `
+        -Port $port `
+        -Credential $emailcred `
+        -UseSsl
+}
+#endregion
